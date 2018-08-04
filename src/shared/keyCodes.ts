@@ -1,0 +1,16 @@
+export const keyCodes = {
+  SPACE: 32,
+  SHIFT: 16,
+  ENTER: 13,
+  CONTROL: 17,
+  ALT: 18,
+  SUPER: 91,
+  ESCAPE: 27,
+  A: 65,
+  W: 87,
+  S: 83,
+  D: 68,
+  I: 73,
+  C: 67,
+  M: 77,
+};

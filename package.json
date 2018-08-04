@@ -1,0 +1,24 @@
+{
+  "name": "blob-engine",
+  "version": "0.0.1",
+  "authors": [
+    "github.com/austin-garrard",
+    "github.com/danwbyrne"
+  ],
+  "description": "tools for browser game development",
+  "main": "index.js",
+  "repository": "https://github.com/danwbyrne/blob-engine.git",
+  "license": "MIT",
+  "private": false,
+
+  "devDependencies": {
+    "@types/jest": "^23.3.1",
+    "jest": "^23.4.2",
+    "ts-jest": "^23.1.2",
+    "typescript": "^3.0.1"
+  },
+  "dependencies": {
+   "socket.io":"2.1.1",
+    "rxjs": "6.2.2"
+  }
+}
