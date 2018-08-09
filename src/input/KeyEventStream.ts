@@ -1,21 +1,25 @@
 import { merge, Observable, Subscription } from 'rxjs';
-import { filter, map, share, tap } from 'rxjs/operators';
+import { filter, map, share } from 'rxjs/operators';
 import { keyCodes } from '../shared/keyCodes';
 import { unless } from '../shared/operators';
 
-export const keyComboStream = ({
-  keySet = new Set(Object(keyCodes).values),
+export interface KeyEvent {
+  readonly keyCode: number;
+}
+
+export const keyEventStream = ({
+  targetKeys = new Set(Object(keyCodes).values),
   blur$,
   keyDown$,
   keyUp$,
   isDisabled$,
 }: {
-  readonly keySet?: Set<number>;
-  readonly blur$: Observable<{}>;
-  readonly keyDown$: Observable<{}>;
-  readonly keyUp$: Observable<{}>;
+  readonly targetKeys?: Set<number>;
+  readonly blur$: Observable<any>;
+  readonly keyDown$: Observable<KeyEvent>;
+  readonly keyUp$: Observable<KeyEvent>;
   readonly isDisabled$: Observable<boolean>;
-}): Observable<{}> =>
+}): Observable<Set<number>> =>
   new Observable((observer) => {
     let currentKeyCombo = new Set<number>();
     const subscription = new Subscription();
@@ -28,18 +32,18 @@ export const keyComboStream = ({
     );
 
     // Set up stream for keydown events
-    const addKeyIfRelevant = (source$: Observable<any>) =>
+    const addKeyIfRelevant = (source$: Observable<KeyEvent>) =>
       source$.pipe(
-        filter((event) => keySet.has(event.keyCode)),
+        filter((event) => targetKeys.has(event.keyCode)),
         map((event) => currentKeyCombo.add(event.keyCode)),
         filter((newKeyCombo) => !(newKeyCombo === currentKeyCombo)),
       );
 
     // Set up stream for keyup events
-    const removeKeyIfRelevant = (source$: Observable<any>) =>
+    const removeKeyIfRelevant = (source$: Observable<KeyEvent>) =>
       source$.pipe(
-        filter((event) => keySet.has(event.keyCode)),
-        tap((event) => currentKeyCombo.delete(event.keyCode)),
+        filter((event) => currentKeyCombo.delete(event.keyCode)),
+        map((_event) => currentKeyCombo),
       );
 
     const _keyDown$ = keyDown$.pipe(
@@ -53,21 +57,15 @@ export const keyComboStream = ({
     );
 
     // Cross the streams ԅ(≖‿≖ԅ)
-    const comboStream = merge(_keyDown$, _keyUp$).pipe(unless(isDisabled$));
+    const keyComboStream = merge(_keyDown$, _keyUp$).pipe(unless(isDisabled$));
 
     subscription.add(
       _keyDown$.subscribe((newKeyCombo) => {
         currentKeyCombo = newKeyCombo;
       }),
     );
-
-    subscription.add(
-      _keyUp$.subscribe((newKeyCombo) => {
-        currentKeyCombo = newKeyCombo;
-      }),
-    );
-
-    subscription.add(comboStream.subscribe(observer));
+    subscription.add(_keyUp$.subscribe());
+    subscription.add(keyComboStream.subscribe(observer));
 
     return subscription;
   });
