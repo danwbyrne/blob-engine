@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "@types/jest": "^23.3.1",
+    "@types/socket.io": "^1.4.36",
     "@types/socket.io-client": "^1.4.32",
     "jest": "^23.4.2",
     "prettier": "^1.14.2",
@@ -25,7 +26,6 @@
     "typescript": "^3.0.1"
   },
   "dependencies": {
-    "@types/socket.io": "^1.4.36",
     "rxjs": "6.2.2",
     "socket.io": "2.1.1",
     "socket.io-client": "^2.1.1"
