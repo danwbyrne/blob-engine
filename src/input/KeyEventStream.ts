@@ -1,71 +1,54 @@
-import { merge, Observable, Subscription } from 'rxjs';
-import { filter, map, share } from 'rxjs/operators';
-import { keyCodes } from '../shared/keyCodes';
+import { merge, Observable, Observer } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { unless } from '../shared/operators';
+import { distinctUntilChanged, filter, scan } from 'rxjs/internal/operators';
+import { OrderedSet, Set } from 'immutable';
 
 export interface KeyEvent {
   readonly keyCode: number;
 }
 
-export const keyEventStream = ({
-  targetKeys = new Set(Object(keyCodes).values),
-  blur$,
-  keyDown$,
-  keyUp$,
-  isDisabled$,
-}: {
-  readonly targetKeys?: Set<number>;
-  readonly blur$: Observable<any>;
-  readonly keyDown$: Observable<KeyEvent>;
-  readonly keyUp$: Observable<KeyEvent>;
-  readonly isDisabled$: Observable<boolean>;
-}): Observable<Set<number>> =>
-  new Observable((observer) => {
-    let currentKeyCombo = new Set<number>();
-    const subscription = new Subscription();
+export const keyEventStream = (
+  targetKeys: number[],
+  blur$: Observable<any>,
+  keyDown$: Observable<KeyEvent>,
+  keyUp$: Observable<KeyEvent>,
+  isDisabled$: Observable<boolean>,
+): Observable<number[]> =>
+  new Observable((observer: Observer<number[]>) => {
+    type NewKeyComboFactory = (currentKeyCombo: Set<number>) => Set<number>;
+    const onlyTargetKeys = filter((event: KeyEvent) => targetKeys.includes(event.keyCode));
 
-    // Remove any keys in the combo when the user alt-tabs
-    subscription.add(
-      blur$.subscribe((_) => {
-        currentKeyCombo.clear();
-      }),
+    const _keyDown$: Observable<NewKeyComboFactory> = keyDown$.pipe(
+      unless(isDisabled$),
+      onlyTargetKeys,
+      map((event: KeyEvent) => (currentKeyCombo: Set<number>) => currentKeyCombo.add(event.keyCode)),
     );
 
-    // Set up stream for keydown events
-    const addKeyIfRelevant = (source$: Observable<KeyEvent>) =>
-      source$.pipe(
-        filter((event) => targetKeys.has(event.keyCode)),
-        map((event) => currentKeyCombo.add(event.keyCode)),
-        filter((newKeyCombo) => !(newKeyCombo === currentKeyCombo)),
-      );
-
-    // Set up stream for keyup events
-    const removeKeyIfRelevant = (source$: Observable<KeyEvent>) =>
-      source$.pipe(
-        filter((event) => currentKeyCombo.delete(event.keyCode)),
-        map((_event) => currentKeyCombo),
-      );
-
-    const _keyDown$ = keyDown$.pipe(
-      addKeyIfRelevant,
-      share(),
+    const _keyUp$: Observable<NewKeyComboFactory> = keyUp$.pipe(
+      unless(isDisabled$),
+      onlyTargetKeys,
+      map((event: KeyEvent) => (currentKeyCombo: Set<number>) => currentKeyCombo.delete(event.keyCode)),
     );
 
-    const _keyUp$ = keyUp$.pipe(
-      removeKeyIfRelevant,
-      share(),
+    const _blur$: Observable<NewKeyComboFactory> = blur$.pipe(
+      unless(isDisabled$),
+      map((event: any) => (currentKeyCombo: Set<number>) => currentKeyCombo.clear()),
     );
 
-    // Cross the streams ԅ(≖‿≖ԅ)
-    const keyComboStream = merge(_keyDown$, _keyUp$).pipe(unless(isDisabled$));
-
-    subscription.add(
-      _keyDown$.subscribe((newKeyCombo) => {
-        currentKeyCombo = newKeyCombo;
-      }),
+    const calculateNewKeyCombo = scan(
+      (
+        currentKeyCombo: Set<number>,
+        createFrom: NewKeyComboFactory,
+      ): Set<number> => createFrom(currentKeyCombo),
+      OrderedSet.of(),
     );
-    subscription.add(_keyUp$.subscribe());
-    subscription.add(keyComboStream.subscribe(observer));
 
-    return subscription;
+    const keyComboStream: Observable<number[]> = merge(_keyDown$, _keyUp$, _blur$).pipe(
+      calculateNewKeyCombo,
+      distinctUntilChanged(),
+      map((newKeyCombo: Set<number>) => newKeyCombo.toJS()),
+    );
+
+    return keyComboStream.subscribe(observer);
   });
