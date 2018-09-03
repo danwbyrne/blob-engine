@@ -1,14 +1,16 @@
 import { Observable } from 'rxjs/index';
 
 export class BlobEvent {
-  public static CONNECTION = (id: number): BlobEvent => new BlobEvent('np', { id });
-  public static DISCONNECT = (id: number): BlobEvent => new BlobEvent('dc', { id });
+  public static CONNECTION = (id: number): BlobEvent => new BlobEvent('np', id);
+  public static DISCONNECT = (id: number): BlobEvent => new BlobEvent('dc', id);
 
   public readonly type: string;
+  public readonly id: number;
   public readonly data: any;
 
-  constructor(type: string, data: any) {
+  constructor(type: string, id: number, data: any = null) {
     this.type = type;
+    this.id = id;
     this.data = data;
   }
 }

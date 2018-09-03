@@ -41,9 +41,7 @@ describe('server', () => {
   it('emits a new player event when client connects', (done: any) => {
     observableServer.pipe(firstMatching('np')).subscribe(
       (next: BlobEvent) => {
-        expect(next).toEqual(new BlobEvent('np', {
-          id: 1,
-        }));
+        expect(next).toEqual(new BlobEvent('np', 1));
         done();
       },
       (error: any) => {
@@ -115,7 +113,7 @@ describe('server', () => {
   it('emits BlobEvents when valid keys are received', (done: any) => {
     observableServer.pipe(firstMatching('1')).subscribe(
       (next: BlobEvent) => {
-        expect(next).toEqual(new BlobEvent('1', { meep: 'moop' }));
+        expect(next).toEqual(new BlobEvent('1', 1, { meep: 'moop' }));
         done();
       },
       (error: any) => {
@@ -151,9 +149,9 @@ describe('server', () => {
         },
         () => {
           expect(logFn.mock.calls).toEqual([
-            [{ type: 'np', data: { id: 1 } }],
-            [{ type: '1', data: { meep: 'moop' } }],
-            [{ type: '2', data: { meep: 'boop' } }],
+            [{ type: 'np', id: 1, data: null  }],
+            [{ type: '1', id: 1, data: { meep: 'moop' } }],
+            [{ type: '2',  id: 1, data: { meep: 'boop' } }],
           ]);
           done();
         },
