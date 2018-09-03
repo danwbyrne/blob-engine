@@ -1,10 +1,13 @@
 import { Observable, Observer } from 'rxjs/index';
 import * as SocketIO from 'socket.io';
 import { BlobEvent } from '../shared/events';
+import { IdGenerator } from './IdGenerator';
 
-export function createObservableServer(
+
+export function createSocketServer(
   io: SocketIO.Server,
   eventKeys: string[],
+  idGenerator: IdGenerator,
 ): Observable<BlobEvent> {
   return new Observable<BlobEvent>((observer: Observer<BlobEvent>) => {
     // Set up new connection
@@ -16,13 +19,15 @@ export function createObservableServer(
         });
       });
 
+      const id = idGenerator.next();
+
       // Set up disconnect handler
       socket.on('disconnect', () => {
-        observer.next(BlobEvent.DISCONNECT());
+        observer.next(BlobEvent.DISCONNECT(id));
       });
 
       // Output new player EventResult
-      observer.next(BlobEvent.CONNECTION());
+      observer.next(BlobEvent.CONNECTION(id));
     });
 
     // Set up error handlers

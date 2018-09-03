@@ -1,8 +1,8 @@
 import { Observable } from 'rxjs/index';
 
 export class BlobEvent {
-  public static CONNECTION = (data: any = null): BlobEvent => new BlobEvent('np', data);
-  public static DISCONNECT = (data: any = null): BlobEvent => new BlobEvent('dc', data);
+  public static CONNECTION = (id: number): BlobEvent => new BlobEvent('np', { id });
+  public static DISCONNECT = (id: number): BlobEvent => new BlobEvent('dc', { id });
 
   public readonly type: string;
   public readonly data: any;
@@ -21,6 +21,7 @@ export interface EventHandler {
   key: string;
   handler: (event: BlobEvent) => EventResults;
 }
+
 //
 // export class EventLogger implements EventHandler {
 //   public key = 'hello';
