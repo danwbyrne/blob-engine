@@ -4,7 +4,7 @@ import { BlobEvent } from '../shared/events';
 import { IdGenerator } from './IdGenerator';
 
 
-export function createSocketServer(
+export function createObservableSocketServer(
   io: SocketIO.Server,
   eventKeys: string[],
   idGenerator: IdGenerator,
@@ -28,19 +28,6 @@ export function createSocketServer(
 
       // Output new player EventResult
       observer.next(BlobEvent.CONNECTION(id));
-    });
-
-    // Set up error handlers
-    io.on('connect_error', (data: any) => {
-      console.log('connect error!', data);
-    });
-
-    io.on('connect_timeout', () => {
-      console.log('connect timeout!');
-    });
-
-    io.on('error', (data: any) => {
-      console.log('error!', data);
     });
   });
 }

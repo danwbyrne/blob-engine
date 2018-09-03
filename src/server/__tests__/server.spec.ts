@@ -3,9 +3,11 @@ import * as SocketServer from 'socket.io';
 import * as SocketClient from 'socket.io-client';
 import { BlobEvent, EventResults } from '../../shared/events';
 import { eventsMatching, firstMatching } from '../../shared/operators';
-import { createSocketServer } from '../SocketServer';
+import { createObservableSocketServer } from '../SocketServer';
 import { skip, take } from 'rxjs/operators';
 import { DefaultIdGenerator } from '../IdGenerator';
+import { BlobMiddleware, createLogger, LogFn } from '../Logger';
+import Mock = jest.Mock;
 
 const port = 9001;
 const clientOptions = {
@@ -26,7 +28,7 @@ describe('server', () => {
     const socketServer = SocketServer(httpServer);
     const eventKeys = ['1', '2', '3'];
     const idGenerator = new DefaultIdGenerator();
-    observableServer = createSocketServer(socketServer, eventKeys, idGenerator);
+    observableServer = createObservableSocketServer(socketServer, eventKeys, idGenerator);
 
     serverInstance = httpServer.listen(port);
   });
@@ -123,5 +125,43 @@ describe('server', () => {
 
     client = connect();
     client.emit('1', { meep: 'moop' });
+  });
+
+  describe('with logger', () => {
+    let logMiddleware: BlobMiddleware;
+    let logFn: Mock<LogFn>;
+
+    beforeEach(() => {
+      logFn = jest.fn<LogFn>();
+      logMiddleware = createLogger(logFn);
+    });
+
+    it('logs each event', (done: any) => {
+      const results: BlobEvent[] = [];
+
+      observableServer.pipe(
+        logMiddleware,
+        take(3),
+      ).subscribe(
+        (next: BlobEvent) => {
+          results.push(next);
+        },
+        (error: any) => {
+          done.fail(error);
+        },
+        () => {
+          expect(logFn.mock.calls).toEqual([
+            [{ type: 'np', data: { id: 1 } }],
+            [{ type: '1', data: { meep: 'moop' } }],
+            [{ type: '2', data: { meep: 'boop' } }],
+          ]);
+          done();
+        },
+      );
+
+      client = connect();
+      client.emit('1', { meep: 'moop' });
+      client.emit('2', { meep: 'boop' });
+    });
   });
 });
