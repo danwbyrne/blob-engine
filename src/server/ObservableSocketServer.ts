@@ -10,8 +10,11 @@ export function createObservableSocketServer(
   idGenerator: IdGenerator,
 ): Observable<BlobEvent> {
   return new Observable<BlobEvent>((observer: Observer<BlobEvent>) => {
+    const sockets: SocketIO.Socket[] = [];
+
     // Set up new connection
     io.on('connection', (socket: SocketIO.Socket) => {
+      sockets.push(socket);
       const id = idGenerator.next();
 
       // Set up event handlers
@@ -24,10 +27,17 @@ export function createObservableSocketServer(
       // Set up disconnect handler
       socket.on('disconnect', () => {
         observer.next(BlobEvent.DISCONNECT(id));
+        sockets.splice(sockets.indexOf(socket));
       });
 
       // Output new player EventResult
       observer.next(BlobEvent.CONNECTION(id));
     });
+
+    // Clean up
+    return () => {
+      io.close();
+      sockets.forEach((socket: SocketIO.Socket) => socket.disconnect(true));
+    }
   });
 }

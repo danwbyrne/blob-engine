@@ -3,11 +3,10 @@ import * as SocketServer from 'socket.io';
 import * as SocketClient from 'socket.io-client';
 import { BlobEvent, EventResults } from '../../shared/events';
 import { eventsMatching, firstMatching } from '../../shared/operators';
-import { createObservableSocketServer } from '../SocketServer';
+import { createObservableSocketServer } from '../ObservableSocketServer';
 import { skip, take } from 'rxjs/operators';
 import { DefaultIdGenerator } from '../IdGenerator';
 import { BlobMiddleware, createLogger, LogFn } from '../Logger';
-import Mock = jest.Mock;
 
 const port = 9001;
 const clientOptions = {
@@ -20,23 +19,19 @@ function connect(): any {
 
 describe('server', () => {
   let observableServer: EventResults;
-  let serverInstance: http.Server;
   let client: any;
 
   beforeEach(() => {
-    const httpServer = http.createServer();
-    const socketServer = SocketServer(httpServer);
+    const socketServer = SocketServer(http.createServer());
     const eventKeys = ['1', '2', '3'];
     const idGenerator = new DefaultIdGenerator();
     observableServer = createObservableSocketServer(socketServer, eventKeys, idGenerator);
 
-    serverInstance = httpServer.listen(port);
+    socketServer.listen(port);
   });
 
-  afterEach(() => {
-    serverInstance.close();
-    client = null;
-  });
+  // socket server needs a little time to clean itself up
+  afterEach(() => new Promise(resolve => setTimeout(resolve, 100)));
 
   it('emits a new player event when client connects', (done: any) => {
     observableServer.pipe(firstMatching('np')).subscribe(
@@ -50,6 +45,31 @@ describe('server', () => {
     );
 
     client = connect();
+  });
+
+  it('emits BlobEvents when valid keys are received', (done: any) => {
+    const results: BlobEvent[] = [];
+
+    observableServer.pipe(take(2)).subscribe(
+      (next: BlobEvent) => {
+        results.push(next);
+      },
+      (error: any) => {
+        done.fail(error);
+      },
+      () => {
+        expect(results).toEqual([
+          new BlobEvent('np', 1),
+          new BlobEvent('1', 1, { meep: 'moop' }),
+        ]);
+
+        done();
+      },
+    );
+
+    client = connect();
+    client.emit('1', { meep: 'moop' });
+    client.emit('lol', { meep: 'moop' });
   });
 
   it('increments player id when client connects', (done: any) => {
@@ -79,55 +99,44 @@ describe('server', () => {
     client = connect();
   });
 
-  // why no work :(
-  xit('emits a disconnect event when client disconnects', (done: any) => {
+  // this test is flaky; less so with the sleep on afterEach
+  it('attaches the player id to each event', (done: any) => {
     const results: BlobEvent[] = [];
 
-    observableServer.pipe(skip(1), take(1)).subscribe(
+    observableServer.pipe(
+      take(5),
+    ).subscribe(
       (next: BlobEvent) => {
-        // console.log(next);
-        // try {
-        //   expect(next).toEqual('hi');
-        // } catch (error) {
-        //   // console.log(error);
-        //   done.fail(error);
-        // } finally {
-        //   done();
-        // }
         results.push(next);
       },
       (error: any) => {
         done.fail(error);
       },
       () => {
-        console.log(results);
+        expect(results).toEqual([
+          BlobEvent.CONNECTION(1),
+          BlobEvent.CONNECTION(2),
+          new BlobEvent('1', 1, 'first'),
+          new BlobEvent('2', 2, 'second'),
+          new BlobEvent('2', 1, 'third'),
+        ]);
+
         done();
       },
     );
 
     client = connect();
-    client.emit('hello', { meep: 'moop' });
-    client.disconnect();
+    const client1 = connect();
+
+    client.emit('1', 'first');
+    client1.emit('2', 'second');
+    client.emit('2', 'third');
   });
 
-  it('emits BlobEvents when valid keys are received', (done: any) => {
-    observableServer.pipe(firstMatching('1')).subscribe(
-      (next: BlobEvent) => {
-        expect(next).toEqual(new BlobEvent('1', 1, { meep: 'moop' }));
-        done();
-      },
-      (error: any) => {
-        done.fail(error);
-      },
-    );
-
-    client = connect();
-    client.emit('1', { meep: 'moop' });
-  });
 
   describe('with logger', () => {
     let logMiddleware: BlobMiddleware;
-    let logFn: Mock<LogFn>;
+    let logFn: jest.Mock<LogFn>;
 
     beforeEach(() => {
       logFn = jest.fn<LogFn>();
@@ -161,5 +170,36 @@ describe('server', () => {
       client.emit('1', { meep: 'moop' });
       client.emit('2', { meep: 'boop' });
     });
+  });
+
+  // why no work :(
+  xit('emits a disconnect event when client disconnects', async (done: any) => {
+    const results: BlobEvent[] = [];
+
+    observableServer.pipe(skip(1), take(1)).subscribe(
+      (next: BlobEvent) => {
+        // console.log(next);
+        // try {
+        //   expect(next).toEqual('hi');
+        // } catch (error) {
+        //   // console.log(error);
+        //   done.fail(error);
+        // } finally {
+        //   done();
+        // }
+        results.push(next);
+      },
+      (error: any) => {
+        done.fail(error);
+      },
+      () => {
+        console.log(results);
+        done();
+      },
+    );
+
+    client = connect();
+    client.emit('hello', { meep: 'moop' });
+    client.disconnect();
   });
 });
