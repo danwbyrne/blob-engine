@@ -3,7 +3,6 @@ import * as SocketIO from 'socket.io';
 import { BlobEvent } from '../shared/events';
 import { IdGenerator } from './IdGenerator';
 
-
 export function createObservableSocketServer(
   io: SocketIO.Server,
   eventKeys: string[],
@@ -38,6 +37,6 @@ export function createObservableSocketServer(
     return () => {
       io.close();
       sockets.forEach((socket: SocketIO.Socket) => socket.disconnect(true));
-    }
+    };
   });
 }

@@ -1,5 +1,5 @@
 export interface IdGenerator {
-  next(): number
+  next(): number;
 }
 
 export class DefaultIdGenerator implements IdGenerator {
@@ -13,5 +13,4 @@ export class DefaultIdGenerator implements IdGenerator {
     this.nextId += 1;
     return this.nextId;
   }
-
 }

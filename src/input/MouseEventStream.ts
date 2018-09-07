@@ -14,7 +14,10 @@ export const mouseEventStream = ({
   mouseMoveIn$: Observable<MouseMoveEvent>;
   mouseDownIn$: Observable<{}>;
   rate: number;
-}): { readonly mouseMove$: Observable<any>; readonly mouseDown$: Observable<any> } => ({
+}): {
+  readonly mouseMove$: Observable<any>;
+  readonly mouseDown$: Observable<any>;
+} => ({
   mouseMove$: mouseMoveIn$.pipe(
     sampleTime(rate),
     map((event: MouseMoveEvent) => ({ x: event.clientX, y: event.clientY })),
