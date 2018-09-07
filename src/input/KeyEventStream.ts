@@ -1,8 +1,8 @@
+import { OrderedSet, Set } from 'immutable';
 import { merge, Observable, Observer } from 'rxjs';
+import { distinctUntilChanged, filter, scan } from 'rxjs/internal/operators';
 import { map } from 'rxjs/operators';
 import { unless } from '../shared/operators';
-import { distinctUntilChanged, filter, scan } from 'rxjs/internal/operators';
-import { OrderedSet, Set } from 'immutable';
 
 export interface KeyEvent {
   readonly keyCode: number;

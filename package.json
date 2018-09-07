@@ -12,7 +12,8 @@
   "private": false,
   "scripts": {
     "test": "jest --watch",
-    "prettier": "prettier --write --config .prettierrc src/**/*.ts"
+    "prettier": "prettier --write --config .prettierrc src/**/*.ts",
+    "tslint": "tslint --fix --project tsconfig.json"
   },
   "devDependencies": {
     "@types/immutable": "^3.8.7",

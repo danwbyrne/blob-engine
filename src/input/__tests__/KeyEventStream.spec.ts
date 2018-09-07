@@ -1,6 +1,6 @@
 import { BehaviorSubject, Observable, Subject } from 'rxjs/index';
-import { KeyEvent, keyEventStream } from '../KeyEventStream';
 import { takeUntil } from 'rxjs/internal/operators';
+import { KeyEvent, keyEventStream } from '../KeyEventStream';
 
 describe('KeyEventStream', () => {
   let blur$: Subject<any>;
