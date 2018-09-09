@@ -1,42 +1,110 @@
-import { Observable } from 'rxjs/index';
+import { GameState } from '../server/GameState';
 
-export class BlobEvent {
-  public static CONNECTION = (id: number): BlobEvent => new BlobEvent('np', id);
-  public static DISCONNECT = (id: number): BlobEvent => new BlobEvent('dc', id);
+// export abstract class BlobEvent {
+//   public static CONNECT = (id: number): BlobEvent => new BlobEvent('np', id);
+//   public static DISCONNECT = (id: number): BlobEvent => new BlobEvent('dc', id);
+//
+//   public readonly type: string;
+//   public readonly id: number;
+//   public readonly data: any;
+//
+//   constructor(type: string, id: number, data: any = null) {
+//     this.type = type;
+//     this.id = id;
+//     this.data = data;
+//   }
+//
+//   public abstract applyTo(gameState: GameState): GameState;
+// }
 
-  public readonly type: string;
-  public readonly id: number;
-  public readonly data: any;
+export interface GameEvent {
+  readonly type: string;
+  readonly id: number;
+  readonly socketId: string;
+  data: () => object;
+}
 
-  constructor(type: string, id: number, data: any = null) {
-    this.type = type;
-    this.id = id;
-    this.data = data;
+export interface BroadcastGameEvent {
+  broadcast: () => GameEvent;
+}
+
+export namespace GameEvents {
+  export class NewPlayer implements GameEvent, BroadcastGameEvent {
+    public readonly id: number;
+    public readonly socketId: string;
+    public readonly type: string;
+
+    constructor(id: number, socketId: string) {
+      this.id = id;
+      this.socketId = socketId;
+      this.type = 'new player';
+    }
+
+    public data = (): object => ({
+      id: this.id,
+    });
+
+    public broadcast = (): GameEvent => new NewPlayer(this.id, '');
   }
 }
 
-// Saving for later
-
-export type EventResults = Observable<BlobEvent>;
-
-export interface EventHandler {
-  key: string;
-  handler: (event: BlobEvent) => EventResults;
+export interface ServerEvent {
+  readonly type: string;
+  readonly id: number;
+  readonly socketId?: string;
+  applyTo: (gameState: GameState) => GameState;
 }
 
-//
-// export class EventLogger implements EventHandler {
-//   public key = 'hello';
-//
-//   private log: Logger;
-//
-//   constructor(logger: Logger) {
-//     this.log = logger;
-//   }
-//
-//   public handler = (event: BlobEvent): EventResults =>
-//     new Observable<BlobEvent>((observer: Observer<BlobEvent>) => {
-//       this.log(event);
-//       observer.next(BlobEvent.TESTY());
-//     });
-// }
+export namespace ServerEvents {
+  export class Connect implements ServerEvent {
+    public readonly id: number;
+    public readonly type: string;
+
+    public readonly socketId: string;
+
+    constructor(id: number, socketId: string) {
+      this.id = id;
+      this.type = 'connect';
+      this.socketId = socketId;
+    }
+
+    public applyTo(gameState: GameState): GameState {
+      return gameState.newPlayer(this.id, this.socketId);
+    }
+  }
+
+  export class Disconnect implements ServerEvent {
+    public readonly id: number;
+    public readonly type: string;
+
+    constructor(id: number) {
+      this.id = id;
+      this.type = 'disconnect';
+    }
+
+    public applyTo(gameState: GameState): GameState {
+      return gameState;
+    }
+  }
+
+  export class NoOpEvent implements ServerEvent {
+    public readonly id: number;
+    public readonly type: string;
+    public readonly data: object;
+
+    constructor(type: string, id: number, data: object) {
+      this.type = type;
+      this.id = id;
+      this.data = data;
+    }
+
+    public applyTo(gameState: GameState): GameState {
+      return gameState;
+    }
+  }
+}
+
+export interface BlobEventFactory {
+  readonly type: string;
+  build: (id: number, data: object) => ServerEvent;
+}
