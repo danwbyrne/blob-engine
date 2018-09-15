@@ -3,12 +3,23 @@ import { Observable, of } from 'rxjs';
 import { concatMap, filter, take, takeWhile } from 'rxjs/operators';
 import * as SocketServer from 'socket.io';
 import * as SocketClient from 'socket.io-client';
-import { BlobEventFactory, ServerEvent, ServerEvents } from '../../shared/events';
+import {
+  GameEvents,
+  IncomingEvent,
+  IncomingEventFactory,
+  OutgoingEvent,
+  PlayerEvents,
+  ServerEvents,
+} from '../../shared/events';
 import { eventsMatching, firstMatching } from '../../shared/operators';
-import { DefaultIdGenerator } from '../IdGenerator';
+import { applyToGameState } from '../GameState';
+import { DefaultIdGenerator, IdGenerator } from '../IdGenerator';
 import { BlobMiddleware, createLogger, LogFn } from '../Logger';
 import { createObservableSocketServer } from '../ObservableSocketServer';
 import NoOpEvent = ServerEvents.NoOpEvent;
+import NewPlayer = GameEvents.NewPlayer;
+import Connect = ServerEvents.Connect;
+import SetName = PlayerEvents.SetName;
 
 const port = 9001;
 const clientOptions = {
@@ -18,37 +29,40 @@ const clientOptions = {
 const connect = (): any =>
   SocketClient(`http://localhost:${port}`, clientOptions);
 
-const testBlobEventFactory = (type: string): BlobEventFactory => ({
+const testBlobEventFactory = (type: string): IncomingEventFactory => ({
   type,
-  build: (id: number, data: object): ServerEvent =>
+  build: (id: number, data: object): IncomingEvent =>
     new NoOpEvent(type, id, data),
 });
 
 const allUntil = (type: string) => (
-  source$: Observable<ServerEvent>,
-): Observable<ServerEvent> =>
+  source$: Observable<IncomingEvent>,
+): Observable<IncomingEvent> =>
   source$.pipe(
     concatMap(
-      (next: ServerEvent) => (next.type === type ? of(next, null) : of(next)),
+      (next: IncomingEvent) => (next.type === type ? of(next, null) : of(next)),
     ),
-    takeWhile<ServerEvent>((next: ServerEvent) => next !== null),
+    takeWhile<IncomingEvent>((next: IncomingEvent) => next !== null),
   );
 
 const ignore = (type: string) =>
-  filter((next: ServerEvent) => next.type !== 'connect');
+  filter((next: IncomingEvent) => next.type !== 'connect');
 
 describe('server', () => {
-  let observableServer: Observable<ServerEvent>;
+  let socketServer: SocketServer.Server;
+  let eventFactories: IncomingEventFactory[];
+  let idGenerator: IdGenerator;
+  let observableServer: Observable<IncomingEvent>;
   let client: any;
 
   beforeEach(() => {
-    const socketServer = SocketServer(http.createServer());
-    const eventFactories = [
+    socketServer = SocketServer(http.createServer());
+    eventFactories = [
       testBlobEventFactory('1'),
       testBlobEventFactory('2'),
       testBlobEventFactory('3'),
     ];
-    const idGenerator = new DefaultIdGenerator();
+    idGenerator = new DefaultIdGenerator();
     observableServer = createObservableSocketServer(
       socketServer,
       eventFactories,
@@ -62,11 +76,12 @@ describe('server', () => {
   afterEach(() => new Promise((resolve) => setTimeout(resolve, 100)));
 
   it('emits a new player event when client connects', (done: any) => {
-    observableServer.pipe(firstMatching('connect')).subscribe(
-      (next: ServerEvent) => {
-        expect(next.type).toEqual('connect');
-        expect(next.id).toEqual(1);
-        expect(next.socketId).toBeDefined();
+    observableServer.pipe(firstMatching<IncomingEvent>('connect')).subscribe(
+      (next: IncomingEvent) => {
+        const result: Connect = next as Connect;
+        expect(result.type).toEqual('connect');
+        expect(result.id).toEqual(1);
+        expect(result.socketId).toBeDefined();
         done();
       },
       (error: any) => {
@@ -78,7 +93,7 @@ describe('server', () => {
   });
 
   it('emits events when valid keys are received', (done: any) => {
-    const results: ServerEvent[] = [];
+    const results: IncomingEvent[] = [];
 
     observableServer
       .pipe(
@@ -86,7 +101,7 @@ describe('server', () => {
         allUntil('1'),
       )
       .subscribe(
-        (next: ServerEvent) => {
+        (next: IncomingEvent) => {
           results.push(next);
         },
         (error: any) => {
@@ -111,7 +126,7 @@ describe('server', () => {
   });
 
   it('increments player id when client connects', (done: any) => {
-    const results: ServerEvent[] = [];
+    const results: IncomingEvent[] = [];
 
     observableServer
       .pipe(
@@ -119,14 +134,14 @@ describe('server', () => {
         take(2),
       )
       .subscribe(
-        (next: ServerEvent) => {
+        (next: IncomingEvent) => {
           results.push(next);
         },
         (error: any) => {
           done.fail(error);
         },
         () => {
-          results.forEach((result: ServerEvent, index: number) => {
+          results.forEach((result: IncomingEvent, index: number) => {
             expect(result.type).toEqual('connect');
             expect(result.id).toEqual(index + 1);
           });
@@ -138,10 +153,9 @@ describe('server', () => {
     client = connect();
     client = connect();
   });
-
   // this test is flaky; less so with the sleep on afterEach
   it('attaches the player id to each event', (done: any) => {
-    const results: ServerEvent[] = [];
+    const results: IncomingEvent[] = [];
 
     observableServer
       .pipe(
@@ -149,7 +163,7 @@ describe('server', () => {
         take(4),
       )
       .subscribe(
-        (next: ServerEvent) => {
+        (next: IncomingEvent) => {
           results.push(next);
         },
         (error: any) => {
@@ -186,7 +200,7 @@ describe('server', () => {
     });
 
     it('logs each event', (done: any) => {
-      const results: ServerEvent[] = [];
+      const results: IncomingEvent[] = [];
 
       observableServer
         .pipe(
@@ -194,7 +208,7 @@ describe('server', () => {
           take(3),
         )
         .subscribe(
-          (next: ServerEvent) => {
+          (next: IncomingEvent) => {
             results.push(next);
           },
           (error: any) => {
@@ -225,12 +239,91 @@ describe('server', () => {
     });
   });
 
+  describe('game server', () => {
+    let gameServer: Observable<OutgoingEvent>;
+
+    beforeEach(() => {
+      socketServer.close();
+      eventFactories = [
+        {
+          type: 'set name',
+          build: (id: number, data: any) => new SetName(id, data.name),
+        },
+      ];
+
+      observableServer = createObservableSocketServer(
+        socketServer,
+        eventFactories,
+        idGenerator,
+      );
+
+      gameServer = observableServer.pipe(applyToGameState());
+      socketServer.listen(port);
+    });
+
+    it('emits a broadcasted new player event when client connects', (done: any) => {
+      const results: OutgoingEvent[] = [];
+
+      gameServer.pipe(take(2)).subscribe(
+        (next: OutgoingEvent) => {
+          results.push(next);
+        },
+        (error: any) => {
+          done.fail(error);
+        },
+        () => {
+          expect(results.length).toEqual(2);
+
+          const newPlayer1 = results[0] as NewPlayer;
+          expect(newPlayer1.type).toEqual('new player');
+          expect(newPlayer1.socketId).toBeDefined();
+          expect(newPlayer1.data()).toEqual({ id: 1 });
+
+          const newPlayer2 = results[1] as NewPlayer;
+          expect(newPlayer2.type).toEqual('new player');
+          expect(newPlayer2.socketId).toEqual('');
+          expect(newPlayer2.data()).toEqual({ id: 1 });
+
+          done();
+        },
+      );
+
+      client = connect();
+    });
+
+    it('emits an UpdatePlayerInfo event when client sets name', (done: any) => {
+      const results: OutgoingEvent[] = [];
+
+      gameServer.pipe(firstMatching<OutgoingEvent>('update player')).subscribe(
+        (next: OutgoingEvent) => {
+          results.push(next);
+        },
+        (error: any) => {
+          done.fail(error);
+        },
+        () => {
+          expect(results.length).toEqual(1);
+
+          expect(results[0].type).toEqual('update player');
+          expect(results[0].data()).toEqual({ id: 1, name: 'bobby boy' });
+
+          done();
+        },
+      );
+
+      client = connect();
+      client.emit('set name', {
+        name: 'bobby boy',
+      });
+    });
+  });
+
   // why no work :(
-  xit('emits a disconnect event when client disconnects', async (done: any) => {
-    const results: ServerEvent[] = [];
+  xit('emits a disconnect event when client disconnects', (done: any) => {
+    const results: IncomingEvent[] = [];
 
     observableServer.pipe(take(2)).subscribe(
-      (next: ServerEvent) => {
+      (next: IncomingEvent) => {
         // console.log(next);
         // try {
         //   expect(next).toEqual('hi');

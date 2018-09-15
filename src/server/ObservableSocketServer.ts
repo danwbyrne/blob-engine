@@ -1,14 +1,14 @@
 import { Observable, Observer } from 'rxjs/index';
 import * as SocketIO from 'socket.io';
-import { BlobEventFactory, ServerEvent, ServerEvents } from '../shared/events';
+import { IncomingEvent, IncomingEventFactory, ServerEvents } from '../shared/events';
 import { IdGenerator } from './IdGenerator';
 
 export function createObservableSocketServer(
   io: SocketIO.Server,
-  eventFactories: BlobEventFactory[],
+  eventFactories: IncomingEventFactory[],
   idGenerator: IdGenerator,
-): Observable<ServerEvent> {
-  return new Observable<ServerEvent>((observer: Observer<ServerEvent>) => {
+): Observable<IncomingEvent> {
+  return new Observable<IncomingEvent>((observer: Observer<IncomingEvent>) => {
     const sockets: SocketIO.Socket[] = [];
 
     // Set up new connection
@@ -17,7 +17,7 @@ export function createObservableSocketServer(
       const id = idGenerator.next();
 
       // Set up event handlers
-      eventFactories.forEach((factory: BlobEventFactory) => {
+      eventFactories.forEach((factory: IncomingEventFactory) => {
         socket.on(factory.type, (data: any) => {
           observer.next(factory.build(id, data));
         });

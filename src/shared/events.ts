@@ -1,35 +1,20 @@
 import { GameState } from '../server/GameState';
 
-// export abstract class BlobEvent {
-//   public static CONNECT = (id: number): BlobEvent => new BlobEvent('np', id);
-//   public static DISCONNECT = (id: number): BlobEvent => new BlobEvent('dc', id);
-//
-//   public readonly type: string;
-//   public readonly id: number;
-//   public readonly data: any;
-//
-//   constructor(type: string, id: number, data: any = null) {
-//     this.type = type;
-//     this.id = id;
-//     this.data = data;
-//   }
-//
-//   public abstract applyTo(gameState: GameState): GameState;
-// }
-
-export interface GameEvent {
+export interface BlobEvent {
   readonly type: string;
   readonly id: number;
-  readonly socketId: string;
+}
+
+export interface OutgoingEvent extends BlobEvent{
   data: () => object;
 }
 
 export interface BroadcastGameEvent {
-  broadcast: () => GameEvent;
+  broadcast: () => OutgoingEvent;
 }
 
 export namespace GameEvents {
-  export class NewPlayer implements GameEvent, BroadcastGameEvent {
+  export class NewPlayer implements OutgoingEvent, BroadcastGameEvent {
     public readonly id: number;
     public readonly socketId: string;
     public readonly type: string;
@@ -44,22 +29,36 @@ export namespace GameEvents {
       id: this.id,
     });
 
-    public broadcast = (): GameEvent => new NewPlayer(this.id, '');
+    public broadcast = (): OutgoingEvent => new NewPlayer(this.id, '');
+  }
+
+  export class UpdatePlayerInfo implements OutgoingEvent {
+    public readonly id: number;
+    public readonly type: string;
+
+    private name: string;
+
+    constructor(id: number, name: string) {
+      this.id = id;
+      this.name = name;
+      this.type = 'update player';
+    }
+
+    public data = (): object => ({
+      id: this.id,
+      name: this.name,
+    });
   }
 }
 
-export interface ServerEvent {
-  readonly type: string;
-  readonly id: number;
-  readonly socketId?: string;
+export interface IncomingEvent extends BlobEvent {
   applyTo: (gameState: GameState) => GameState;
 }
 
 export namespace ServerEvents {
-  export class Connect implements ServerEvent {
+  export class Connect implements IncomingEvent {
     public readonly id: number;
     public readonly type: string;
-
     public readonly socketId: string;
 
     constructor(id: number, socketId: string) {
@@ -73,7 +72,7 @@ export namespace ServerEvents {
     }
   }
 
-  export class Disconnect implements ServerEvent {
+  export class Disconnect implements IncomingEvent {
     public readonly id: number;
     public readonly type: string;
 
@@ -87,7 +86,7 @@ export namespace ServerEvents {
     }
   }
 
-  export class NoOpEvent implements ServerEvent {
+  export class NoOpEvent implements IncomingEvent {
     public readonly id: number;
     public readonly type: string;
     public readonly data: object;
@@ -104,7 +103,24 @@ export namespace ServerEvents {
   }
 }
 
-export interface BlobEventFactory {
+export namespace PlayerEvents {
+  export class SetName implements IncomingEvent {
+    public readonly id: number;
+    public readonly type: string;
+
+    private readonly name: string;
+
+    constructor(id: number, name: string) {
+      this.id = id;
+      this.type = 'set name';
+      this.name = name;
+    }
+
+    public applyTo = (gameState: GameState) => gameState.setPlayerName(this.id, this.name);
+  }
+}
+
+export interface IncomingEventFactory {
   readonly type: string;
-  build: (id: number, data: object) => ServerEvent;
+  build: (id: number, data: any) => IncomingEvent;
 }
