@@ -10,15 +10,45 @@
   "repository": "https://github.com/danwbyrne/blob-engine.git",
   "license": "MIT",
   "private": false,
-
+  "scripts": {
+    "test": "jest --watch",
+    "prettier": "prettier --write --config .prettierrc src/**/*.ts",
+    "tslint": "tslint --fix --project tsconfig.json"
+  },
   "devDependencies": {
+    "@types/immutable": "^3.8.7",
     "@types/jest": "^23.3.1",
+    "@types/socket.io": "^1.4.36",
+    "@types/socket.io-client": "^1.4.32",
     "jest": "^23.4.2",
+    "prettier": "^1.14.2",
     "ts-jest": "^23.1.2",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.14.0",
+    "tslint-react": "^3.6.0",
     "typescript": "^3.0.1"
   },
   "dependencies": {
-   "socket.io":"2.1.1",
-    "rxjs": "6.2.2"
+    "immutable": "^3.8.2",
+    "rxjs": "6.2.2",
+    "socket.io": "2.1.1",
+    "socket.io-client": "^2.1.1"
+  },
+  "jest": {
+    "rootDir": "./src",
+    "testEnvironment": "node",
+    "testURL": "http://localhost/",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "testMatch": [
+      "**/*.spec.+(ts|tsx)"
+    ]
   }
 }
