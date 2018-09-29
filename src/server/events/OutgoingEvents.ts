@@ -4,12 +4,12 @@ export interface OutgoingEvent {
 
 export namespace OutgoingEvents {
   export class NewPlayer implements OutgoingEvent {
-    public static create = (id: number, socketId: string) =>
-      new NewPlayer(id, socketId);
+    public static create = (id: number) =>
+      new NewPlayer(id);
 
     private readonly id: number;
 
-    constructor(id: number, socketId: string) {
+    constructor(id: number) {
       this.id = id;
     }
 

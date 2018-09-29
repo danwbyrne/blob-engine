@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { IncomingEvent } from '../shared/events';
+import { IncomingEvent } from './events/IncomingEvents';
 
 export type BlobMiddleware = (
   source$: Observable<IncomingEvent>,

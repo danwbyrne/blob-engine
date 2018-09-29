@@ -3,10 +3,9 @@ import { Observable } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 import * as SocketServer from 'socket.io';
 import * as SocketClient from 'socket.io-client';
-import { IncomingEvent, IncomingEventFactory, OutgoingEvent } from '../../shared/events';
 import { allUntil, eventsMatching } from '../../shared/operators';
-import { IncomingEvents } from '../events/IncomingEvents';
-import { OutgoingEvents } from '../events/OutgoingEvents';
+import { IncomingEvent, IncomingEventFactory, IncomingEvents } from '../events/IncomingEvents';
+import { OutgoingEvent, OutgoingEvents } from '../events/OutgoingEvents';
 import { DefaultIdGenerator, IdGenerator } from '../IdGenerator';
 import { BlobMiddleware, createLogger, LogFn } from '../Logger';
 import { createObservableSocketServer } from '../ObservableSocketServer';
@@ -138,6 +137,7 @@ describe('server', () => {
     client = connect();
     client = connect();
   });
+
   // this test is flaky; less so with the sleep on afterEach
   it('attaches the player id to each event', (done: any) => {
     const results: IncomingEvent[] = [];
@@ -302,15 +302,6 @@ describe('server', () => {
 
     observableServer.pipe(take(2)).subscribe(
       (next: IncomingEvent) => {
-        // console.log(next);
-        // try {
-        //   expect(next).toEqual('hi');
-        // } catch (error) {
-        //   // console.log(error);
-        //   done.fail(error);
-        // } finally {
-        //   done();
-        // }
         results.push(next);
       },
       (error: any) => {

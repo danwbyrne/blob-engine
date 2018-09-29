@@ -1,6 +1,6 @@
 import { Observable, of, pipe } from 'rxjs';
 import { concatMap, filter, map, takeWhile, withLatestFrom } from 'rxjs/operators';
-import { IncomingEvent } from './events';
+import { IncomingEvent } from '../server/events/IncomingEvents';
 
 export const unless = (locked$: Observable<any>) => (
   source$: Observable<any>,
