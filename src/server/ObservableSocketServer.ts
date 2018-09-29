@@ -1,14 +1,14 @@
 import { Observable, Observer } from 'rxjs/index';
 import * as SocketIO from 'socket.io';
-import { BlobEvent } from '../shared/events';
+import { IncomingEvent, IncomingEventFactory, IncomingEvents } from './events/IncomingEvents';
 import { IdGenerator } from './IdGenerator';
 
 export function createObservableSocketServer(
   io: SocketIO.Server,
-  eventKeys: string[],
+  eventFactories: IncomingEventFactory[],
   idGenerator: IdGenerator,
-): Observable<BlobEvent> {
-  return new Observable<BlobEvent>((observer: Observer<BlobEvent>) => {
+): Observable<IncomingEvent> {
+  return new Observable<IncomingEvent>((observer: Observer<IncomingEvent>) => {
     const sockets: SocketIO.Socket[] = [];
 
     // Set up new connection
@@ -17,20 +17,20 @@ export function createObservableSocketServer(
       const id = idGenerator.next();
 
       // Set up event handlers
-      eventKeys.forEach((key: string) => {
-        socket.on(key, (data: any) => {
-          observer.next(new BlobEvent(key, id, data));
-        });
+      eventFactories.forEach((factory: IncomingEventFactory) => {
+        socket.on(factory.type, (data: any) =>
+          observer.next(factory.build(id, data)),
+        );
       });
 
       // Set up disconnect handler
       socket.on('disconnect', () => {
-        observer.next(BlobEvent.DISCONNECT(id));
+        observer.next(new IncomingEvents.Disconnect(id));
         sockets.splice(sockets.indexOf(socket));
       });
 
       // Output new player EventResult
-      observer.next(BlobEvent.CONNECTION(id));
+      observer.next(new IncomingEvents.Connect(id, socket.id));
     });
 
     // Clean up
