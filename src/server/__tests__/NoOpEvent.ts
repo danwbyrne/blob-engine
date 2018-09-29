@@ -1,4 +1,4 @@
-import { IncomingEvent } from '../../shared/events';
+import { IncomingEvent } from '../events/IncomingEvents';
 import { GameState } from '../GameState';
 
 export class NoOpEvent implements IncomingEvent {
