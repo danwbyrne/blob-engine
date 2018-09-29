@@ -14,18 +14,18 @@ export class Player {
 }
 
 export class GameState {
-  private players: Map<number,Player>;
+  private players: Map<number, Player>;
   private updates: List<OutgoingEvent>;
 
   constructor() {
-    this.players = Map<number,Player>();
+    this.players = Map<number, Player>();
     this.updates = List<OutgoingEvent>();
   }
 
   public newPlayer(id: number, socketId: string): GameState {
-    this.players = this.players.set(id, (new Player(id, socketId)));
+    this.players = this.players.set(id, new Player(id, socketId));
 
-    this.updates = this.updates.push(OutgoingEvents.NewPlayer.create(id, socketId));
+    this.updates = this.updates.push(OutgoingEvents.NewPlayer.create(id));
 
     return this;
   }
@@ -33,7 +33,7 @@ export class GameState {
   public setPlayerName(id: number, name: string): GameState {
     this.players.get(id).name = name;
 
-    const updatePlayerInfo = new OutgoingEvents.UpdatePlayerInfo(id, name);
+    const updatePlayerInfo = OutgoingEvents.UpdatePlayerInfo.create(id, name);
     this.updates = this.updates.push(updatePlayerInfo);
 
     return this;
@@ -45,4 +45,3 @@ export class GameState {
     return updates.toJS();
   }
 }
-

@@ -30,7 +30,7 @@ const testBlobEventFactory = (type: string): IncomingEventFactory => ({
 });
 
 const ignore = (type: string) =>
-  filter((next: IncomingEvent) => next.type !== 'connect');
+  filter((next: IncomingEvent) => next.type !== type);
 
 describe('server', () => {
   let socketServer: SocketServer.Server;
@@ -181,7 +181,7 @@ describe('server', () => {
 
     beforeEach(() => {
       logFn = jest.fn<LogFn>();
-      logMiddleware = createLogger(logFn);
+      logMiddleware = createLogger<IncomingEvent>(logFn);
     });
 
     it('logs each event', (done: any) => {
@@ -260,6 +260,7 @@ describe('server', () => {
           expect(results.length).toEqual(1);
 
           const newPlayer1 = results[0] as NewPlayer;
+          expect(newPlayer1.type).toEqual('new player');
           expect(newPlayer1.data()).toEqual({ id: 1 });
 
           done();
@@ -282,7 +283,9 @@ describe('server', () => {
         () => {
           expect(results.length).toEqual(2);
 
+          expect(results[0].type).toEqual('new player');
           expect(results[0].data()).toEqual({ id: 1 });
+          expect(results[1].type).toEqual('update player');
           expect(results[1].data()).toEqual({ id: 1, name: 'bobby boy' });
 
           done();
