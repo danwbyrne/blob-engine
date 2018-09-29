@@ -1,6 +1,6 @@
 import { Observable, Observer } from 'rxjs/index';
 import * as SocketIO from 'socket.io';
-import { IncomingEvent, IncomingEventFactory, ServerEvents } from '../shared/events';
+import { IncomingEvent, IncomingEventFactory, IncomingEvents } from './events/IncomingEvents';
 import { IdGenerator } from './IdGenerator';
 
 export function createObservableSocketServer(
@@ -18,19 +18,19 @@ export function createObservableSocketServer(
 
       // Set up event handlers
       eventFactories.forEach((factory: IncomingEventFactory) => {
-        socket.on(factory.type, (data: any) => {
-          observer.next(factory.build(id, data));
-        });
+        socket.on(factory.type, (data: any) =>
+          observer.next(factory.build(id, data)),
+        );
       });
 
       // Set up disconnect handler
       socket.on('disconnect', () => {
-        observer.next(new ServerEvents.Disconnect(id));
+        observer.next(new IncomingEvents.Disconnect(id));
         sockets.splice(sockets.indexOf(socket));
       });
 
       // Output new player EventResult
-      observer.next(new ServerEvents.Connect(id, socket.id));
+      observer.next(new IncomingEvents.Connect(id, socket.id));
     });
 
     // Clean up
