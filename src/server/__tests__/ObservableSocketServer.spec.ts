@@ -3,10 +3,9 @@ import { Observable } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 import * as SocketServer from 'socket.io';
 import * as SocketClient from 'socket.io-client';
-import { IncomingEvent, IncomingEventFactory, OutgoingEvent } from '../../shared/events';
 import { allUntil, eventsMatching } from '../../shared/operators';
-import { IncomingEvents } from '../events/IncomingEvents';
-import { OutgoingEvents } from '../events/OutgoingEvents';
+import { IncomingEvent, IncomingEventFactory, IncomingEvents } from '../events/IncomingEvents';
+import { OutgoingEvent, OutgoingEvents } from '../events/OutgoingEvents';
 import { DefaultIdGenerator, IdGenerator } from '../IdGenerator';
 import { BlobMiddleware, createLogger, LogFn } from '../Logger';
 import { createObservableSocketServer } from '../ObservableSocketServer';
@@ -31,7 +30,7 @@ const testBlobEventFactory = (type: string): IncomingEventFactory => ({
 });
 
 const ignore = (type: string) =>
-  filter((next: IncomingEvent) => next.type !== 'connect');
+  filter((next: IncomingEvent) => next.type !== type);
 
 describe('server', () => {
   let socketServer: SocketServer.Server;
@@ -138,6 +137,7 @@ describe('server', () => {
     client = connect();
     client = connect();
   });
+
   // this test is flaky; less so with the sleep on afterEach
   it('attaches the player id to each event', (done: any) => {
     const results: IncomingEvent[] = [];
@@ -181,7 +181,7 @@ describe('server', () => {
 
     beforeEach(() => {
       logFn = jest.fn<LogFn>();
-      logMiddleware = createLogger(logFn);
+      logMiddleware = createLogger<IncomingEvent>(logFn);
     });
 
     it('logs each event', (done: any) => {
@@ -260,6 +260,7 @@ describe('server', () => {
           expect(results.length).toEqual(1);
 
           const newPlayer1 = results[0] as NewPlayer;
+          expect(newPlayer1.type).toEqual('new player');
           expect(newPlayer1.data()).toEqual({ id: 1 });
 
           done();
@@ -282,7 +283,9 @@ describe('server', () => {
         () => {
           expect(results.length).toEqual(2);
 
+          expect(results[0].type).toEqual('new player');
           expect(results[0].data()).toEqual({ id: 1 });
+          expect(results[1].type).toEqual('update player');
           expect(results[1].data()).toEqual({ id: 1, name: 'bobby boy' });
 
           done();
@@ -302,15 +305,6 @@ describe('server', () => {
 
     observableServer.pipe(take(2)).subscribe(
       (next: IncomingEvent) => {
-        // console.log(next);
-        // try {
-        //   expect(next).toEqual('hi');
-        // } catch (error) {
-        //   // console.log(error);
-        //   done.fail(error);
-        // } finally {
-        //   done();
-        // }
         results.push(next);
       },
       (error: any) => {

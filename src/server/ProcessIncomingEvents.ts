@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs';
 import { map, mergeAll, scan } from 'rxjs/operators';
-import { IncomingEvent, OutgoingEvent } from '../shared/events';
+import { IncomingEvent } from './events/IncomingEvents';
+import { OutgoingEvent } from './events/OutgoingEvents';
 import { GameState } from './GameState';
 
 const applyToGameState = (

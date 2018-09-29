@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { IncomingEvent } from '../shared/events';
+import { IncomingEvent } from './events/IncomingEvents';
 
 export type BlobMiddleware = (
   source$: Observable<IncomingEvent>,
@@ -8,6 +8,5 @@ export type BlobMiddleware = (
 
 export type LogFn = (message?: any, ...optionalParams: any[]) => void;
 
-export const createLogger = (log: LogFn): BlobMiddleware => (
-  source$: Observable<IncomingEvent>,
-) => source$.pipe(tap(log));
+export const createLogger = <T>(log: LogFn) => (source$: Observable<T>) =>
+  source$.pipe(tap(log));
