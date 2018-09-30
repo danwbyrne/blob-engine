@@ -30,25 +30,9 @@
   },
   "dependencies": {
     "immutable": "^3.8.2",
+    "lerna": "^3.4.0",
     "rxjs": "6.2.2",
     "socket.io": "2.1.1",
     "socket.io-client": "^2.1.1"
-  },
-  "jest": {
-    "rootDir": "./src",
-    "testEnvironment": "node",
-    "testURL": "http://localhost/",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx"
-    ],
-    "transform": {
-      "^.+\\.(ts|tsx)$": "ts-jest"
-    },
-    "testMatch": [
-      "**/*.spec.+(ts|tsx)"
-    ]
   }
 }

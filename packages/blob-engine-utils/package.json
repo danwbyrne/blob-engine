@@ -1,0 +1,12 @@
+{
+  "name": "@blob-engine/utils",
+  "version": "0.0.0",
+  "description": "blob-engine utils package",
+  "author": "Daniel Byrne <danwbyrne@gmail.com>",
+  "homepage": "https://github.com/danwbyrne/blob-engine#readme",
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "dependencies": {
+
+  }
+}

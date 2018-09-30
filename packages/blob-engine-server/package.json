@@ -1,0 +1,14 @@
+{
+  "name": "@blob-engine/server",
+  "version": "0.0.0",
+  "description": "blob-engine server package",
+  "author": "Daniel Byrne <danwbyrne@gmail.com>",
+  "homepage": "https://github.com/danwbyrne/blob-engine#readme",
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@blob-engine/utils": "0.0.0",
+    "rxjs": "^6.3.3",
+    "socket.io":"^2.1.1"
+  }
+}

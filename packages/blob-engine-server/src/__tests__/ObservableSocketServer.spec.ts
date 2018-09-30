@@ -1,16 +1,16 @@
+import { allUntil, eventsMatching } from '@neo-one/utils';
 import * as http from 'http';
 import { Observable } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 import * as SocketServer from 'socket.io';
 import * as SocketClient from 'socket.io-client';
-import { allUntil, eventsMatching } from '../../shared/operators';
+import { NoOpEvent } from '../__data__/NoOpEvent';
 import { IncomingEvent, IncomingEventFactory, IncomingEvents } from '../events/IncomingEvents';
 import { OutgoingEvent, OutgoingEvents } from '../events/OutgoingEvents';
 import { DefaultIdGenerator, IdGenerator } from '../IdGenerator';
 import { BlobMiddleware, createLogger, LogFn } from '../Logger';
 import { createObservableSocketServer } from '../ObservableSocketServer';
 import { processIncomingEvents } from '../ProcessIncomingEvents';
-import { NoOpEvent } from './NoOpEvent';
 import Connect = IncomingEvents.Connect;
 import SetName = IncomingEvents.SetName;
 import NewPlayer = OutgoingEvents.NewPlayer;

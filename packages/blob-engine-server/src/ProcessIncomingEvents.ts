@@ -1,8 +1,6 @@
+import { GameState, IncomingEvent, OutgoingEvent } from '@blob-engine/utils';
 import { Observable } from 'rxjs';
 import { map, mergeAll, scan } from 'rxjs/operators';
-import { IncomingEvent } from './events/IncomingEvents';
-import { OutgoingEvent } from './events/OutgoingEvents';
-import { GameState } from './GameState';
 
 const applyToGameState = (
   gameState: GameState,
