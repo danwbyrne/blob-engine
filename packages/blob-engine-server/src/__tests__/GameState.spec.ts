@@ -1,9 +1,12 @@
+import {
+  GameState,
+  IncomingEvent,
+  IncomingEvents,
+  OutgoingEvent,
+} from '@blob-engine/utils';
 import { Subject } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { IncomingEvent, IncomingEvents } from '../events/IncomingEvents';
 import Connect = IncomingEvents.Connect;
-import { OutgoingEvent } from '../events/OutgoingEvents';
-import { GameState } from '../GameState';
 import { processIncomingEvents } from '../ProcessIncomingEvents';
 
 describe('applyToGameState', () => {

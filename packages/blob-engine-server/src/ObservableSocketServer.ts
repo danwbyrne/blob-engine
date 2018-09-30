@@ -1,6 +1,10 @@
-import { Observable, Observer } from 'rxjs/index';
+import {
+  IncomingEvent,
+  IncomingEventFactory,
+  IncomingEvents,
+} from '@blob-engine/utils';
+import { Observable, Observer } from 'rxjs';
 import * as SocketIO from 'socket.io';
-import { IncomingEvent, IncomingEventFactory, IncomingEvents } from './events/IncomingEvents';
 import { IdGenerator } from './IdGenerator';
 
 export function createObservableSocketServer(

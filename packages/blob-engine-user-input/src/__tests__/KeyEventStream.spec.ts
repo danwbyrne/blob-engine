@@ -16,10 +16,16 @@ describe('KeyEventStream', () => {
     keyUp$ = new Subject();
     isDisabled$ = new BehaviorSubject<boolean>(false);
 
-    keyEventStream$ = keyEventStream(targetKeys, blur$, keyDown$, keyUp$, isDisabled$);
+    keyEventStream$ = keyEventStream(
+      targetKeys,
+      blur$,
+      keyDown$,
+      keyUp$,
+      isDisabled$,
+    );
   });
 
-  it('adds key codes for key down events', done => {
+  it('adds key codes for key down events', (done) => {
     const results: number[][] = [];
     const finished$ = new Subject();
 
@@ -31,11 +37,7 @@ describe('KeyEventStream', () => {
         done.fail(error);
       },
       () => {
-        expect(results).toEqual([
-          [1],
-          [1, 2],
-          [1, 2, 3],
-        ]);
+        expect(results).toEqual([[1], [1, 2], [1, 2, 3]]);
 
         done();
       },
@@ -47,7 +49,7 @@ describe('KeyEventStream', () => {
     finished$.next();
   });
 
-  it('removes key codes for key up events', done => {
+  it('removes key codes for key up events', (done) => {
     const results: number[][] = [];
     const finished$ = new Subject();
 
@@ -59,12 +61,7 @@ describe('KeyEventStream', () => {
         done.fail(error);
       },
       () => {
-        expect(results).toEqual([
-          [1],
-          [1, 2],
-          [2],
-          [],
-        ]);
+        expect(results).toEqual([[1], [1, 2], [2], []]);
 
         done();
       },
@@ -77,7 +74,7 @@ describe('KeyEventStream', () => {
     finished$.next();
   });
 
-  it('only emits if the key combination changes', done => {
+  it('only emits if the key combination changes', (done) => {
     const results: number[][] = [];
     const finished$ = new Subject();
 
@@ -89,11 +86,7 @@ describe('KeyEventStream', () => {
         done.fail(error);
       },
       () => {
-        expect(results).toEqual([
-          [1],
-          [1, 2],
-          [1],
-        ]);
+        expect(results).toEqual([[1], [1, 2], [1]]);
 
         done();
       },
@@ -108,7 +101,7 @@ describe('KeyEventStream', () => {
     finished$.next();
   });
 
-  it('only emits for target keys', done => {
+  it('only emits for target keys', (done) => {
     const results: number[][] = [];
     const finished$ = new Subject();
 
@@ -120,10 +113,7 @@ describe('KeyEventStream', () => {
         done.fail(error);
       },
       () => {
-        expect(results).toEqual([
-          [1],
-          [],
-        ]);
+        expect(results).toEqual([[1], []]);
 
         done();
       },
@@ -136,7 +126,7 @@ describe('KeyEventStream', () => {
     finished$.next();
   });
 
-  it('only emits when the latest value from isDisabled$ is false', done => {
+  it('only emits when the latest value from isDisabled$ is false', (done) => {
     const results: number[][] = [];
     const finished$ = new Subject();
 
@@ -148,13 +138,7 @@ describe('KeyEventStream', () => {
         done.fail(error);
       },
       () => {
-        expect(results).toEqual([
-          [1],
-          [1, 2],
-          [1, 2, 3],
-          [2, 3],
-          [],
-        ]);
+        expect(results).toEqual([[1], [1, 2], [1, 2, 3], [2, 3], []]);
 
         done();
       },
@@ -177,7 +161,7 @@ describe('KeyEventStream', () => {
     finished$.next();
   });
 
-  it('clears the key combination on blur (browser alt-tab)', done => {
+  it('clears the key combination on blur (browser alt-tab)', (done) => {
     const results: number[][] = [];
     const finished$ = new Subject();
 
@@ -189,11 +173,7 @@ describe('KeyEventStream', () => {
         done.fail(error);
       },
       () => {
-        expect(results).toEqual([
-          [1],
-          [1, 2],
-          [1],
-        ]);
+        expect(results).toEqual([[1], [1, 2], [1]]);
 
         done();
       },

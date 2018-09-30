@@ -1,0 +1,18 @@
+{
+  "name": "@blob-engine/user-input",
+  "version": "0.0.0",
+  "description": "blob-engine user-input package",
+  "authors": [
+    "github.com/austin-garrard",
+    "github.com/danwbyrne"
+  ],
+  "homepage": "https://github.com/danwbyrne/blob-engine#readme",
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@types/immutable": "^3.8.7",
+    "@blob-engine/utils": "0.0.0",
+    "immutable": "3.8.2",
+    "rxjs":"^6.3.3"
+  }
+}

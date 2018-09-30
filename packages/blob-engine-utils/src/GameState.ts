@@ -1,5 +1,5 @@
 import { List, Map } from 'immutable';
-import { OutgoingEvent, OutgoingEvents } from './events/OutgoingEvents';
+import { OutgoingEvent, OutgoingEvents } from './events';
 
 export class Player {
   public readonly id: number;
