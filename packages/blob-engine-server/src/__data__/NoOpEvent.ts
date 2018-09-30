@@ -1,5 +1,4 @@
-import { IncomingEvent } from '../events/IncomingEvents';
-import { GameState } from '../GameState';
+import { IncomingEvent, GameState } from '@blob-engine/utils';
 
 export class NoOpEvent implements IncomingEvent {
   public readonly id: number;

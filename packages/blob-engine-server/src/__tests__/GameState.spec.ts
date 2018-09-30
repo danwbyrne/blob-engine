@@ -1,4 +1,9 @@
-import { GameState, IncomingEvent, IncomingEvents, OutgoingEvent } from '@blob-engine/utils';
+import {
+  GameState,
+  IncomingEvent,
+  IncomingEvents,
+  OutgoingEvent,
+} from '@blob-engine/utils';
 import { Subject } from 'rxjs';
 import { take } from 'rxjs/operators';
 import Connect = IncomingEvents.Connect;

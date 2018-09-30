@@ -1,4 +1,8 @@
-import { IncomingEvent, IncomingEventFactory, IncomingEvents } from '@blob-engine/utils';
+import {
+  IncomingEvent,
+  IncomingEventFactory,
+  IncomingEvents,
+} from '@blob-engine/utils';
 import { Observable, Observer } from 'rxjs';
 import * as SocketIO from 'socket.io';
 import { IdGenerator } from './IdGenerator';

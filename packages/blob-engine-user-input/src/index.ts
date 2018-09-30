@@ -1,7 +1,3 @@
-'use strict';
-
-module.exports = userInput;
-
-function userInput() {
-    // TODO
-}
+export * from './KeyEventStream';
+export * from './MouseEventStream';
+export * from './UserInput';

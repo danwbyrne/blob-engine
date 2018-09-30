@@ -1,12 +1,17 @@
-import { allUntil, eventsMatching } from '@neo-one/utils';
+import { allUntil, eventsMatching } from '@blob-engine/utils';
 import * as http from 'http';
 import { Observable } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 import * as SocketServer from 'socket.io';
 import * as SocketClient from 'socket.io-client';
 import { NoOpEvent } from '../__data__/NoOpEvent';
-import { IncomingEvent, IncomingEventFactory, IncomingEvents } from '../events/IncomingEvents';
-import { OutgoingEvent, OutgoingEvents } from '../events/OutgoingEvents';
+import {
+  IncomingEvent,
+  IncomingEventFactory,
+  IncomingEvents,
+  OutgoingEvent,
+  OutgoingEvents,
+} from '@blob-engine/utils';
 import { DefaultIdGenerator, IdGenerator } from '../IdGenerator';
 import { BlobMiddleware, createLogger, LogFn } from '../Logger';
 import { createObservableSocketServer } from '../ObservableSocketServer';
