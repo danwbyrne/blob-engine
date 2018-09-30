@@ -1,15 +1,20 @@
 import { List, Map } from 'immutable';
 import { OutgoingEvent, OutgoingEvents } from './events';
 
+export interface PlayerOptions {
+  readonly id: number;
+  readonly socketId: string;
+}
+
 export class Player {
   public readonly id: number;
   public readonly socketId: string;
   public name: string;
 
-  constructor(id: number, socketId: string) {
-    this.id = id;
-    this.socketId = socketId;
-    this.name = `Player ${id}`;
+  constructor(options: PlayerOptions) {
+    this.id = options.id;
+    this.socketId = options.socketId;
+    this.name = `Player ${this.id}`;
   }
 }
 
