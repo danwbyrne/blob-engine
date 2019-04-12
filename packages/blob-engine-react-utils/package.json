@@ -1,0 +1,14 @@
+{
+  "name": "@blob-engine/react-utils",
+  "version": "0.0.1",
+  "description": "B L O B - E N G I N E - R E A C T - U T I L S",
+  "main": "src/index.ts",
+
+  "dependencies": {
+    "@types/react": "^16.8.13",
+    "@types/react-dom": "^16.8.4",
+    "rxjs": "^6.4.0",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "@blob-engine/sandbox",
+  "version": "0.0.1",
+  "description": "B L O B - E N G I N E - S A N D B O X",
+  "main": "src/index.tsx",
+
+  "dependencies": {
+    "rxjs": "^6.4.0"
+  }
+}
