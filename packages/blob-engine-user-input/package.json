@@ -1,11 +1,8 @@
 {
-  "name": "blob-engine-user-input",
+  "name": "@blob-engine/user-input",
   "version": "0.0.1",
   "description": "...",
-  "main": "src/index.ts",
-  "repository": "github.com/danwbyrne/blobber-x.git",
-  "author": "github.com/danwbyrne",
-  "license": "MIT",
+  "main": "./src/index.ts",
 
   "dependencies": {
     "rxjs": "^6.4.0"

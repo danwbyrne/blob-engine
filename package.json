@@ -2,7 +2,7 @@
   "name": "blob-engine",
   "version": "0.0.0",
   "description": "B L O B - E N G I N E",
-  "repository": "github.com/danwbyrne/blobber-x.git",
+  "repository": "github.com/danwbyrne/blob-engine.git",
   "author": "github.com/danwbyrne",
   "license": "MIT",
 
@@ -11,17 +11,17 @@
     "packages/*"
   ],
 
-
   "devDependencies": {
     "@types/jest": "24.0.11",
-    "@types/node": "^11.13.0",
-    "@types/webpack": "4.4.26",
+    "@types/node": "^11.13.4",
+    "@types/webpack": "4.4.27",
     "concurrently": "4.1.0",
     "cross-env": "5.2.0",
     "fs-extra": "7.0.1",
-    "jest": "24.5.0",
+    "jest": "24.7.1",
     "lerna": "^3.13.2",
     "prettier": "1.16.4",
+    "rxjs":"^6.4.0",
     "tslint": "5.15.0",
     "tslint-clean-code": "0.2.9",
     "tslint-config-prettier": "1.18.0",
@@ -29,7 +29,7 @@
     "tslint-immutable": "5.5.2",
     "tslint-microsoft-contrib": "6.1.0",
     "tslint-sonarts": "1.9.0",
-    "typescript": "3.3.1",
+    "typescript": "3.3.4000",
     "webpack": "4.29.6"
   },
 

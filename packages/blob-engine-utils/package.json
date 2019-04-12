@@ -1,11 +1,8 @@
 {
-  "name": "blob-engine-utils",
+  "name": "@blob-engine/utils",
   "version": "0.0.1",
-  "description": "B L O B B E R X - U T I L S",
+  "description": "B L O B - E N G I N E - U T I L S",
   "main": "src/index.ts",
-  "repository": "github.com/danwbyrne/blobber-x.git",
-  "author": "github.com/danwbyrne",
-  "license": "MIT",
 
   "dependencies": {
     "rxjs": "^6.4.0"

@@ -11,12 +11,6 @@
     "./node_modules/tslint-clean-code/dist/build",
     "./node_modules/rxjs-tslint-rules/dist/rules"
   ],
-  "linterOptions": {
-    "exclude": [
-      "package.json",
-      "./packages/*/package.json",
-    ]
-  },
   "rules": {
     "cyclomatic-complexity": false,
     "no-unused-variable": false,

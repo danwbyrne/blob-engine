@@ -1,12 +1,11 @@
 {
-  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.tsdk": "./node_modules/typescript/lib",
   "typescript.format.insertSpaceBeforeFunctionParenthesis": false,
   "typescript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
-  "typescript.format.enable": false,
-  "javascript.format.enable": false,
   "typescript.preferences.quoteStyle": "single",
   "javascript.preferences.quoteStyle": "single",
   "editor.formatOnPaste": false,
   "editor.formatOnSave": true,
   "cSpell.language": "en",
+  "typescript.preferences.importModuleSpecifier": "relative",
 }
