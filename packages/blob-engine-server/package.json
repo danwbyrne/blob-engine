@@ -1,0 +1,21 @@
+{
+  "name": "@blob-engine/server",
+  "version": "0.0.1",
+  "description": "...",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "debug": "^4.1.1",
+    "express": "^4.17.1",
+    "lodash": "^4.17.15",
+    "nanoid": "^2.0.3",
+    "rxjs": "^6.5.2",
+    "socket.io": "^2.2.0"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.5",
+    "@types/express": "^4.17.0",
+    "@types/lodash": "^4.14.136",
+    "@types/nanoid": "^2.0.0",
+    "@types/socket.io": "^2.1.2"
+  }
+}

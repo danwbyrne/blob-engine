@@ -2,39 +2,40 @@ import { DependencyList, useEffect, useMemo, useRef, useState } from 'react';
 import { Observable, Subscription } from 'rxjs';
 
 export function useStream<T>(createStream$: () => Observable<T>, props: DependencyList, initialValue: T): T {
-  const subscriptionRef = useRef<Subscription | undefined>(undefined);
-  const setValueRef = useRef<((value: T) => void) | undefined>(undefined);
+  const mutableSubscriptionRef = useRef<Subscription | undefined>(undefined);
+  const mutableSetValueRef = useRef<((value: T) => void) | undefined>(undefined);
 
   // Subscribe during the first render in case there is a synchronous result.
   const first = useMemo(() => {
-    if (subscriptionRef.current !== undefined) {
-      subscriptionRef.current.unsubscribe();
+    if (mutableSubscriptionRef.current !== undefined) {
+      mutableSubscriptionRef.current.unsubscribe();
     }
 
     let firstValue = initialValue;
-    subscriptionRef.current = createStream$().subscribe({
+    // tslint:disable-next-line: no-object-mutation
+    mutableSubscriptionRef.current = createStream$().subscribe({
       next: (nextValue) => {
         firstValue = nextValue;
-        if (setValueRef.current !== undefined) {
-          setValueRef.current(nextValue);
+        if (mutableSetValueRef.current !== undefined) {
+          mutableSetValueRef.current(nextValue);
         }
       },
     });
 
     return firstValue;
-  }, [...props, subscriptionRef, setValueRef]);
+  }, [...props, mutableSubscriptionRef, mutableSetValueRef]);
 
   // Make sure we do a final cleanup of the subscription
   useEffect(
     () => () => {
-      if (subscriptionRef.current !== undefined) {
-        subscriptionRef.current.unsubscribe();
+      if (mutableSubscriptionRef.current !== undefined) {
+        mutableSubscriptionRef.current.unsubscribe();
       }
     },
-    [subscriptionRef],
+    [mutableSubscriptionRef],
   );
   const [value, setValue] = useState<T>(first);
-  setValueRef.current = setValue;
+  mutableSetValueRef.current = setValue;
 
   return value;
 }

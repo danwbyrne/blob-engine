@@ -1,17 +1,20 @@
 {
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "importHelpers": true,
     "alwaysStrict": true,
-    "baseUrl": ".",
-    "module": "esnext",
+    "baseUrl": "./packages",
+    "module": "commonjs",
     "target": "esnext",
     "lib": ["esnext", "dom"],
     "paths": {
-      "@neo-one/*":
-      ["./neo-one-*/src"]
+      "@blob-engine/*":
+      ["./blob-engine-*/src"]
     },
+    "outDir": "./dist",
     "sourceMap": true,
-    "allowJs": true,
+    "declaration": true,
     "jsx": "react",
     "moduleResolution": "node",
     "forceConsistentCasingInFileNames": true,

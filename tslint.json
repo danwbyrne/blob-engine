@@ -32,7 +32,7 @@
     "no-expression-statement": false,
     "no-parameter-properties": false,
     "prefer-function-over-method": false,
-    "file-name-casing": [true, "camel-case"],
+    "file-name-casing": [true, "camel-case", "pascal-case"],
     "static-this": false,
     "no-null-undefined-union": false,
 
@@ -71,7 +71,7 @@
     ],
     "no-submodule-imports": [
       true,
-      "rxjs",
+      "rxjs"
     ],
     "strict-boolean-expressions": [
       true,
@@ -79,7 +79,7 @@
       "allow-undefined-union",
       "allow-string",
       "allow-number",
-      "allow-mix",
+      "allow-mix"
     ],
     "no-implicit-dependencies": [
       true,
@@ -113,7 +113,6 @@
     "export-name": true,
     "no-control-regex": true,
     "no-empty-line-after-opening-brace": true,
-    "increment-decrement": true,
     "no-invalid-regexp": true,
     "no-regex-spaces": true,
     "no-single-line-block-comment": false,
@@ -160,6 +159,7 @@
     "rxjs-finnish": true,
     "rxjs-no-ignored-error": false,
     "ban-ts-ignore": false,
-    "no-default-import": false
+    "no-default-import": false,
+    "strict-comparisons": false
   }
 }
