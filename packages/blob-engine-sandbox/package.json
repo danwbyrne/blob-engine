@@ -6,5 +6,8 @@
 
   "dependencies": {
     "rxjs": "^6.4.0"
+  },
+  "scripts": {
+    "build": "yarn gulp build"
   }
 }

@@ -9,5 +9,8 @@
   },
   "devDependencies": {
     "@types/socket.io-client": "^1.4.32"
+  },
+  "scripts": {
+    "build": "yarn gulp build"
   }
 }

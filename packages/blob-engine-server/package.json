@@ -17,5 +17,8 @@
     "@types/lodash": "^4.14.136",
     "@types/nanoid": "^2.0.0",
     "@types/socket.io": "^2.1.2"
+  },
+  "scripts": {
+    "build": "yarn gulp build"
   }
 }
