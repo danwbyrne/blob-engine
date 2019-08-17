@@ -43,7 +43,7 @@ const getDefaultBuild = (pkgName: string) => (format: Format) => {
     .src(['packages/*/src/**/*.ts'])
     .pipe(gulpFilter([`packages/blob-engine-${pkgName}/**/*`]))
     .pipe(tsProject())
-    .js.pipe(flattenSource)
+    .pipe(flattenSource)
     .pipe(gulp.dest(getDest()));
 };
 
