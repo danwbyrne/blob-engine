@@ -4,6 +4,7 @@
   "description": "...",
   "main": "./src/index.ts",
   "dependencies": {
+    "@blob-engine/core": "^0.0.1",
     "debug": "^4.1.1",
     "express": "^4.17.1",
     "lodash": "^4.17.15",
@@ -19,6 +20,7 @@
     "@types/socket.io": "^2.1.2"
   },
   "scripts": {
-    "build": "yarn gulp build"
+    "build": "yarn gulp build",
+    "watch": "yarn gulp watch"
   }
 }

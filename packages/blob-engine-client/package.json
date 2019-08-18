@@ -11,6 +11,7 @@
     "@types/socket.io-client": "^1.4.32"
   },
   "scripts": {
-    "build": "yarn gulp build"
+    "build": "yarn gulp build",
+    "watch": "yarn gulp watch"
   }
 }

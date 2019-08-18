@@ -12,6 +12,7 @@
     "react-dom": "^16.8.6"
   },
   "scripts": {
-    "build": "yarn gulp build"
+    "build": "yarn gulp build",
+    "watch": "yarn gulp watch"
   }
 }

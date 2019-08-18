@@ -1,0 +1,18 @@
+{
+  "name": "@blob-engine/core",
+  "version": "0.0.1",
+  "description": "B L O B - E N G I N E - C O R E",
+  "main": "src/index.tsx",
+
+  "dependencies": {
+    "rxjs": "^6.4.0",
+    "lodash": "^4.17.15"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.108"
+  },
+  "scripts": {
+    "build": "yarn gulp build",
+    "watch": "yarn gulp watch"
+  }
+}

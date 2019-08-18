@@ -8,6 +8,7 @@
     "rxjs": "^6.4.0"
   },
   "scripts": {
-    "build": "yarn gulp build"
+    "build": "yarn gulp build",
+    "watch": "yarn gulp watch"
   }
 }

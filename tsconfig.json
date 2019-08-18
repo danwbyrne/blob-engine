@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    // "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "importHelpers": true,
     "alwaysStrict": true,
@@ -27,11 +26,11 @@
     "strict": true,
     "strictNullChecks": true,
     "suppressImplicitAnyIndexErrors": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": true
   },
   "exclude": [
     "node_modules",
-    "dist",
+    "dist"
   ]
 }
 
