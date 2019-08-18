@@ -1,7 +1,8 @@
 {
   "name": "@blob-engine/server",
   "version": "0.0.1",
-  "description": "...",
+  "description": "blob-engine server",
+  "license": "MIT",
   "main": "./src/index.ts",
   "dependencies": {
     "@blob-engine/core": "^0.0.1",

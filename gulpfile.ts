@@ -151,7 +151,6 @@ gulp.task('build', (done) => {
   done();
 });
 
-gulp.task('watch', (done) => {
+gulp.task('watch', () => {
   watchSource();
-  done();
 });

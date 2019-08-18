@@ -2,6 +2,7 @@
   "name": "@blob-engine/client",
   "version": "0.0.1",
   "description": "B L O B - E N G I N E - C L I E N T",
+  "license": "MIT",
   "main": "./src/index.ts",
 
   "dependencies": {

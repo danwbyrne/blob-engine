@@ -2,6 +2,7 @@
   "name": "@blob-engine/core",
   "version": "0.0.1",
   "description": "B L O B - E N G I N E - C O R E",
+  "license": "MIT",
   "main": "src/index.tsx",
 
   "dependencies": {
