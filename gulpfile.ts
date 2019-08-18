@@ -6,6 +6,8 @@ import gulpRename from 'gulp-rename';
 import gulpTypescript from 'gulp-typescript';
 import fs from 'fs-extra';
 import execa from 'execa';
+import plumber from 'gulp-plumber';
+import through from 'through2';
 // @ts-ignore
 import jsonTransform from 'gulp-json-transform';
 
@@ -83,25 +85,26 @@ const getInitDir = () => {
 const buildDir = getInitDir();
 const pkgName = getPackage(buildDir);
 
-const buildPackage = (format: Format = { config: 'tsconfig.json' }) => {
+const buildPackage = (format: Format = { config: 'tsconfig.json' }, watch: boolean = false) => {
   const maybeBuild = specialBuilds[pkgName];
   const buildProcess = maybeBuild !== undefined ? maybeBuild : defaultBuild;
-  buildProcess(format);
+  buildProcess(format, watch);
 };
 
-const defaultBuild = (format: Format) => {
+const defaultBuild = (format: Format, watch: boolean) => {
   const tsProject = gulpTypescript.createProject(format.config);
   return gulp
     .src(['packages/*/src/**/*.ts'])
     .pipe(gulpFilter([`packages/blob-engine-${pkgName}/**/*`]))
+    .pipe(watch ? plumber() : through.obj())
     .pipe(tsProject())
     .pipe(flattenSource)
     .pipe(gulp.dest(getDest()));
 };
 
 const watchSource = () => {
-  return gulp.watch(`packages/blob-engine-${pkgName}/**/*`, (done) => {
-    buildPackage(undefined);
+  return gulp.watch(`packages/blob-engine-${pkgName}/**/*`, function rebuild(done) {
+    buildPackage(undefined, true);
     done();
   });
 };
@@ -147,7 +150,7 @@ gulp.task('rootBuild', (done) => {
 
 // package builds
 gulp.task('build', (done) => {
-  buildPackage(undefined);
+  buildPackage();
   done();
 });
 

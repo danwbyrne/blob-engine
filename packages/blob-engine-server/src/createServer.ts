@@ -20,23 +20,25 @@ export const createServer = <State>(options: CreateServerOptions<State>) => {
   app.use(express.static('public'));
   const server = new Server(app);
 
-  const eventBusInit$ = new Subject<GameEvent>();
+  const eventBus$ = new Subject<GameEvent>();
   const connectionManager = new ConnectionManager();
-  const { handler: socketHandler, eventBus$ } = createSocketHandler(connectionManager, eventBusInit$);
+  const socketHandler = createSocketHandler(connectionManager, eventBus$);
 
-  const gameState = new GameState({
-    initialState: options.initialState,
-    initialHandlers: new Map(),
-    eventBus$,
-  });
-
-  timer(0, options.tickRate).subscribe(() => console.log(gameState.getState()));
-
-  gameState.registerEventHandler('init', (state: State) => {
+  const initialHandlers = new Map();
+  initialHandlers.set('init', (state: State) => {
     log('INIT STATE HANDLER FIRED');
 
     return state;
   });
+
+  const gameState = new GameState({
+    initialState: options.initialState,
+    initialHandlers,
+    eventBus$,
+  });
+
+  gameState.init();
+  timer(0, options.tickRate).subscribe(() => log(gameState.getState()));
 
   const io = SocketIO(server);
   io.on('connection', socketHandler);

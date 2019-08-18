@@ -1,32 +1,52 @@
+import debug from 'debug';
 import _ from 'lodash';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, scan } from 'rxjs/operators';
-import { GameEvent, GameEventHandler, GameStateOptions } from './types';
+import { GameEvent, GameEventHandler } from './types';
+
+const log = debug('blob-engine:game-state');
+
+export interface GameStateOptions<T> {
+  readonly initialState: T;
+  readonly initialHandlers: Map<string, GameEventHandler<T> | undefined>;
+  readonly eventBus$: Observable<GameEvent>;
+}
 
 export class GameState<State> {
   private readonly eventHandlers: Map<string, GameEventHandler<State> | undefined>;
+  private readonly initialState: State;
+  private mutableSubscription: Subscription | undefined;
   private readonly state$: BehaviorSubject<State>;
   private readonly eventBus$: Observable<GameEvent>;
 
   public constructor(options: GameStateOptions<State>) {
     this.eventBus$ = options.eventBus$;
     this.eventHandlers = options.initialHandlers;
-    this.state$ = new BehaviorSubject(options.initialState);
+    this.initialState = options.initialState;
+    this.state$ = new BehaviorSubject(this.initialState);
+  }
 
-    this.eventBus$
+  public init() {
+    this.mutableSubscription = this.eventBus$
       .pipe(
         scan((prevState, event) => {
-          console.log('THIS IS FIRING INSIDE THE EVENT BUS');
+          log('event bus firing: %o', event);
           const handler = this.eventHandlers.get(event.name);
+          log('maybe got a handler?: %o', handler);
           if (handler !== undefined) {
             return handler(prevState, event);
           }
 
           return prevState;
-        }, options.initialState),
-        distinctUntilChanged((a, b) => _.isEqual(a, b)),
+        }, this.initialState),
       )
       .subscribe(this.state$);
+  }
+
+  public close() {
+    if (this.mutableSubscription !== undefined) {
+      this.mutableSubscription.unsubscribe();
+    }
   }
 
   public getState() {

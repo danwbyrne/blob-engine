@@ -8,4 +8,7 @@
   "editor.formatOnSave": true,
   "cSpell.language": "en",
   "typescript.preferences.importModuleSpecifier": "relative",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.tslint": true
+  }
 }
