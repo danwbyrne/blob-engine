@@ -1,7 +1,6 @@
 import debug from 'debug';
-import _ from 'lodash';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, scan } from 'rxjs/operators';
+import { Subject, Subscription } from 'rxjs';
+import { scan } from 'rxjs/operators';
 import { GameEvent, GameEventHandler } from './types';
 
 const log = debug('blob-engine:game-state');
@@ -9,48 +8,43 @@ const log = debug('blob-engine:game-state');
 export interface GameStateOptions<T> {
   readonly initialState: T;
   readonly initialHandlers: Map<string, GameEventHandler<T> | undefined>;
-  readonly eventBus$: Observable<GameEvent>;
+  readonly eventBus$: Subject<GameEvent>;
 }
 
 export class GameState<State> {
   private readonly eventHandlers: Map<string, GameEventHandler<State> | undefined>;
-  private readonly initialState: State;
-  private mutableSubscription: Subscription | undefined;
-  private readonly state$: BehaviorSubject<State>;
-  private readonly eventBus$: Observable<GameEvent>;
+  private readonly mutableSubscription: Subscription | undefined;
+  private mutableState: State | undefined;
+  private readonly eventBus$: Subject<GameEvent>;
 
   public constructor(options: GameStateOptions<State>) {
     this.eventBus$ = options.eventBus$;
     this.eventHandlers = options.initialHandlers;
-    this.initialState = options.initialState;
-    this.state$ = new BehaviorSubject(this.initialState);
-  }
-
-  public init() {
+    this.mutableState = options.initialState;
     this.mutableSubscription = this.eventBus$
       .pipe(
         scan((prevState, event) => {
           log('event bus firing: %o', event);
-          const handler = this.eventHandlers.get(event.name);
-          log('maybe got a handler?: %o', handler);
-          if (handler !== undefined) {
-            return handler(prevState, event);
-          }
 
-          return prevState;
-        }, this.initialState),
+          const result = this.handleEvent(prevState, event);
+          log('result from event: %o', result);
+
+          return result;
+        }, options.initialState),
       )
-      .subscribe(this.state$);
+      .subscribe({
+        next: (value) => (this.mutableState = value),
+      });
+  }
+
+  public getState() {
+    return this.mutableState;
   }
 
   public close() {
     if (this.mutableSubscription !== undefined) {
       this.mutableSubscription.unsubscribe();
     }
-  }
-
-  public getState() {
-    return this.state$.getValue();
   }
 
   public registerEventHandler(name: string, handler: GameEventHandler<State>) {
@@ -67,5 +61,17 @@ export class GameState<State> {
     } catch {
       // do nothing
     }
+  }
+
+  private handleEvent(prevState: State, event: GameEvent) {
+    const handler = this.eventHandlers.get(event.name);
+    log('maybe got a handler?: %o', handler);
+    if (handler !== undefined) {
+      log('got a handler: %o', handler);
+
+      return handler(prevState, event);
+    }
+
+    return prevState;
   }
 }

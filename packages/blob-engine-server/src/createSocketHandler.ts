@@ -11,7 +11,7 @@ export const createSocketHandler = (connectionManager: ConnectionManager, eventB
   });
 
   eventBus$.next({
-    name: 'init',
+    name: 'connect',
     args: {
       socketID: socket.id,
     },
@@ -19,5 +19,11 @@ export const createSocketHandler = (connectionManager: ConnectionManager, eventB
 
   socket.on('disconnect', () => {
     connectionManager.removeConnection(socket.id);
+    eventBus$.next({
+      name: 'disconnect',
+      args: {
+        socketID: socket.id,
+      },
+    });
   });
 };

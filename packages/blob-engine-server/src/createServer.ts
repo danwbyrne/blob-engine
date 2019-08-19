@@ -1,4 +1,4 @@
-import { GameEvent, GameState } from '@blob-engine/core';
+import { GameEvent, GameEventHandlers, GameState } from '@blob-engine/core';
 import debug from 'debug';
 // tslint:disable-next-line: match-default-export-name
 import express from 'express';
@@ -13,6 +13,7 @@ const log = debug('blog-engine:server');
 interface CreateServerOptions<State> {
   readonly tickRate: number;
   readonly initialState: State;
+  readonly initialHandlers: GameEventHandlers<State>;
 }
 
 export const createServer = <State>(options: CreateServerOptions<State>) => {
@@ -24,21 +25,13 @@ export const createServer = <State>(options: CreateServerOptions<State>) => {
   const connectionManager = new ConnectionManager();
   const socketHandler = createSocketHandler(connectionManager, eventBus$);
 
-  const initialHandlers = new Map();
-  initialHandlers.set('init', (state: State) => {
-    log('INIT STATE HANDLER FIRED');
-
-    return state;
-  });
-
   const gameState = new GameState({
     initialState: options.initialState,
-    initialHandlers,
+    initialHandlers: options.initialHandlers,
     eventBus$,
   });
 
-  gameState.init();
-  timer(0, options.tickRate).subscribe(() => log(gameState.getState()));
+  timer(0, options.tickRate).subscribe(() => console.log(gameState.getState()));
 
   const io = SocketIO(server);
   io.on('connection', socketHandler);

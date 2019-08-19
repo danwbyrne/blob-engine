@@ -4,3 +4,5 @@ export interface GameEvent {
 }
 
 export type GameEventHandler<T> = (state: T, event: GameEvent) => T;
+
+export type GameEventHandlers<T> = Map<string, GameEventHandler<T>>;
