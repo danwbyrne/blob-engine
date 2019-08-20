@@ -13,7 +13,7 @@ const log = debug('blog-engine:server');
 interface CreateServerOptions<State> {
   readonly tickRate: number;
   readonly initialState: State;
-  readonly initialHandlers: GameEventHandlers<State>;
+  readonly handlers: GameEventHandlers<State>;
 }
 
 export const createServer = <State>(options: CreateServerOptions<State>) => {
@@ -23,7 +23,7 @@ export const createServer = <State>(options: CreateServerOptions<State>) => {
 
   const eventBus$ = new Subject<GameEvent>();
   const connectionManager = new ConnectionManager();
-  const socketHandler = createSocketHandler(connectionManager, eventBus$, [...options.initialHandlers.keys()]);
+  const socketHandler = createSocketHandler(connectionManager, eventBus$, [...options.handlers.keys()]);
 
   const io = SocketIO(server);
   io.on('connection', socketHandler);
@@ -42,7 +42,7 @@ export const createServer = <State>(options: CreateServerOptions<State>) => {
 
   const gameState = new GameState({
     initialState: options.initialState,
-    initialHandlers: options.initialHandlers,
+    initialHandlers: options.handlers,
     eventBus$,
   });
 
