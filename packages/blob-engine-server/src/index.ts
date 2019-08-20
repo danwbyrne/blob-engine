@@ -6,8 +6,8 @@ interface TestGameState {
 }
 
 const initialHandlers: GameEventHandlers<TestGameState> = new Map();
-initialHandlers.set('connect', (state, event) => ({ test: event.name }));
-initialHandlers.set('disconnect', (state, event) => ({ test: event.name }));
+initialHandlers.set('connect', (_state, event) => ({ test: event.type }));
+initialHandlers.set('disconnect', (_state, event) => ({ test: event.type }));
 
 const server = createServer<TestGameState>({
   tickRate: 2000,

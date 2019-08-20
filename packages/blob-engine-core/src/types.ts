@@ -1,5 +1,5 @@
 export interface GameEvent {
-  readonly name: string;
+  readonly type: string;
   readonly args?: Record<string, string | number | boolean>;
 }
 

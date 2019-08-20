@@ -7,7 +7,7 @@ export interface Connection {
   readonly socket: Socket;
 }
 
-export type Connections = Record<Connection['id'], Connection['socket']>;
+export type Connections = Record<Connection['id'], Connection['socket'] | undefined>;
 
 export interface ConnectionManager {
   readonly addConnection: (connection: Connection) => void;

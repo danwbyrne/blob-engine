@@ -1,9 +1,6 @@
-import debug from 'debug';
 import { Subject, Subscription } from 'rxjs';
 import { scan } from 'rxjs/operators';
 import { GameEvent, GameEventHandler } from './types';
-
-const log = debug('blob-engine:game-state');
 
 export interface GameStateOptions<T> {
   readonly initialState: T;
@@ -21,20 +18,9 @@ export class GameState<State> {
     this.eventBus$ = options.eventBus$;
     this.eventHandlers = options.initialHandlers;
     this.mutableState = options.initialState;
-    this.mutableSubscription = this.eventBus$
-      .pipe(
-        scan((prevState, event) => {
-          log('event bus firing: %o', event);
-
-          const result = this.handleEvent(prevState, event);
-          log('result from event: %o', result);
-
-          return result;
-        }, options.initialState),
-      )
-      .subscribe({
-        next: (value) => (this.mutableState = value),
-      });
+    this.mutableSubscription = this.eventBus$.pipe(scan(this.handleEvent, options.initialState)).subscribe({
+      next: (value) => (this.mutableState = value),
+    });
   }
 
   public getState() {
@@ -64,11 +50,8 @@ export class GameState<State> {
   }
 
   private handleEvent(prevState: State, event: GameEvent) {
-    const handler = this.eventHandlers.get(event.name);
-    log('maybe got a handler?: %o', handler);
+    const handler = this.eventHandlers.get(event.type);
     if (handler !== undefined) {
-      log('got a handler: %o', handler);
-
       return handler(prevState, event);
     }
 

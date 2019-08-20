@@ -30,7 +30,6 @@ export class ConnectionManager {
 
   public removeConnection(id: string) {
     const { [id]: socket, ...reducedConnections } = this.getConnections();
-    // tslint:disable-next-line: strict-type-predicates
     if (socket !== undefined) {
       log('terminating connection: %o', { socketID: id });
       this.connectionsInternal$.next(reducedConnections);

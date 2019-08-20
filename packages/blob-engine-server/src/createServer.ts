@@ -23,15 +23,7 @@ export const createServer = <State>(options: CreateServerOptions<State>) => {
 
   const eventBus$ = new Subject<GameEvent>();
   const connectionManager = new ConnectionManager();
-  const socketHandler = createSocketHandler(connectionManager, eventBus$);
-
-  const gameState = new GameState({
-    initialState: options.initialState,
-    initialHandlers: options.initialHandlers,
-    eventBus$,
-  });
-
-  timer(0, options.tickRate).subscribe(() => console.log(gameState.getState()));
+  const socketHandler = createSocketHandler(connectionManager, eventBus$, [...options.initialHandlers.keys()]);
 
   const io = SocketIO(server);
   io.on('connection', socketHandler);
@@ -47,6 +39,14 @@ export const createServer = <State>(options: CreateServerOptions<State>) => {
   io.on('error', (error?: Error) => {
     log('error: %o', error);
   });
+
+  const gameState = new GameState({
+    initialState: options.initialState,
+    initialHandlers: options.initialHandlers,
+    eventBus$,
+  });
+
+  timer(0, options.tickRate).subscribe(() => io.sockets.emit('tick', gameState.getState()));
 
   return server;
 };
